@@ -21,28 +21,27 @@ class OrderRepository extends ServiceEntityRepository
         parent::__construct($registry, Order::class);
     }
 
-//    /**
-//     * @return Order[] Returns an array of Order objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('o')
-//            ->andWhere('o.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('o.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function getOrdersWithCustomerInfo(int $customerId)
+    {
+        $orders = $this->createQueryBuilder('o')
+            ->select('o', 'c.id as customerId', 'c.lastname')
+            ->join('o.customer', 'c')
+            ->where('c.id = :customerId')
+            ->setParameter('customerId', $customerId)
+            ->getQuery()
+            ->getResult(\Doctrine\ORM\Query::HYDRATE_ARRAY);
 
-//    public function findOneBySomeField($value): ?Order
-//    {
-//        return $this->createQueryBuilder('o')
-//            ->andWhere('o.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        $orders = array_map(function($order){
+                $order = (array) $order;
+                $row = $order[0];
+                $row['customer'] = [
+                    'customerId' => $order['customerId'],
+                    'lastname' => $order['lastname'],
+                ];
+                return $row;
+            }, $orders);
+
+        return $orders;
+
+    }
 }

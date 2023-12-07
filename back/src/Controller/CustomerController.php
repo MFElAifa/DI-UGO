@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Customer;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\CustomerRepository;
+use App\Repository\OrderRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -11,25 +11,19 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/customers')]
 class CustomerController extends AbstractController
 {
-    public function __construct(private EntityManagerInterface $entityManager)
-    {
-    }
-
     #[Route('/', name: 'list_customers')]
-    public function list(): JsonResponse
+    public function list(CustomerRepository $customerRepository): JsonResponse
     {
-        $repository = $this->entityManager->getRepository(Customer::class);
-        
         return $this->json([
-            'data' => $repository->findAll()
+            'data' => $customerRepository->findAll()
         ]);
     }
 
-    #[Route('/{id}/orders', name: 'orders_by_customer_id', requirements:["customer_id"=>"\d+"])]
-    public function ordersByCustomer(Customer $customer): JsonResponse
+    #[Route('/{customerId}/orders', name: 'orders_by_customer_id', requirements: ["customerId" => "\d+"])]
+    public function ordersByCustomer(OrderRepository $orderRepository, int $customerId): JsonResponse
     {
         return $this->json([
-            'data' => $customer->getOrders()
+            'data' => $orderRepository->getOrdersWithCustomerInfo($customerId)
         ]);
     }
 }
