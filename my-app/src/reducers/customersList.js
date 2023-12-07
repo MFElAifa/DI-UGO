@@ -1,33 +1,35 @@
 import { 
-    ORDERS_REQUEST, 
-    ORDERS_ERROR, 
-    ORDERS_RECEIVED
+    CUSTOMERS_REQUEST, 
+    CUSTOMERS_ERROR, 
+    CUSTOMERS_RECEIVED
 
 } from "../actions/constants";
 
-export default(state = {
-    orders: null,
+const customersListReducer = (state = {
+    customers: null,
     isFetching: false
 }, action) => {
     switch(action.type){
-        case ORDERS_REQUEST:
+        case CUSTOMERS_REQUEST:
             return {
                 ...state,
                 isFetching: true,
             };
-        case ORDERS_RECEIVED:
+        case CUSTOMERS_RECEIVED:
             return {
                 ...state,
-                orders: action.data.data,
+                customers: action.data.data,
                 isFetching: false
             };
-        case ORDERS_ERROR:
+        case CUSTOMERS_ERROR:
             return {
                 ...state,
                 isFetching: false,
-                orders: null
+                customers: null
             };
         default:
             return state;
     };
 };
+
+export default customersListReducer;
