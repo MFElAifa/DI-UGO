@@ -31,30 +31,35 @@ class UgoOrdersImportCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('customer', InputArgument::REQUIRED, 'Path to the customer file')
-            ->addArgument('order', InputArgument::REQUIRED, 'Path to the order file')
+            ->addArgument('customerFile', InputArgument::OPTIONAL, 'Path to the customer file')
+            ->addArgument('orderFile', InputArgument::OPTIONAL, 'Path to the order file')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $fileCustomer = $input->getArgument('customer');
-        $fileOrder = $input->getArgument('order');
+        $customerFile = $input->getArgument('customerFile');
+        $orderFile = $input->getArgument('orderFile');
+        
+        
+        if(!$customerFile && !$orderFile){
+            $io->write("\nNo Files to Load...");
+        }
 
-        if ($fileCustomer) {
+        if ($customerFile) {
             $io->title('Load customers ...');
         
-            $this->loadCustomers($io, $fileCustomer);
+            $this->loadCustomers($io, $customerFile);
 
             $io->write("\nSuccess! Load customers...");
         }
 
 
-        if ($fileOrder) {
+        if ($orderFile) {
             $io->title('Load orders ...');
         
-            $this->loadOrders($io, $fileOrder);
+            $this->loadOrders($io, $orderFile);
 
             $io->write("\nSuccess! Load order...");
         }
@@ -69,6 +74,10 @@ class UgoOrdersImportCommand extends Command
     {
         $fileExtension = pathinfo($file, PATHINFO_EXTENSION);
         
+        if(strtoupper($fileExtension) !== 'CSV'){
+            return [];
+        }
+
         $encoders = [new CsvEncoder()];
         $normalizers = [new ObjectNormalizer()];
 
@@ -140,7 +149,7 @@ class UgoOrdersImportCommand extends Command
 
         $ctp = 0;
         foreach($this->getDataFile($fileOrder) as $row){
-            if(count($row)<7){
+            if(count($row) < 7){
                 $io->write("\nNumber of columns not available!");
                 break;
             }

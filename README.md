@@ -6,7 +6,7 @@
 ```
 composer install
 php bin/console doctrine:migrations:migrate # Create Schema Database
-php bin/console ugo:orders:import <customer> <order> #Command to loading customers and orders.
+php bin/console ugo:orders:import <customerFile> <orderFile> #Command to loading customers and orders.
 php bin/phpunit # Launch Test
 php -S localhost:8000 -t public # Start Server
 ```

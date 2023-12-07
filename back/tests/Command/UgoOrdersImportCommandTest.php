@@ -35,8 +35,8 @@ class UgoOrdersImportCommandTest extends KernelTestCase
         $command = $application->find('ugo:orders:import');
         $definition = $command->getDefinition();
 
-        $this->assertTrue($definition->hasArgument('customer'));
-        $this->assertTrue($definition->hasArgument('order'));
+        $this->assertTrue($definition->hasArgument('customerFile'));
+        $this->assertTrue($definition->hasArgument('orderFile'));
     }
 
     public function testExecutionWithValidFiles()
@@ -49,10 +49,28 @@ class UgoOrdersImportCommandTest extends KernelTestCase
         $tester = new CommandTester($command);
 
         $tester->execute([
-            'customer' => 'csv/customers.csv',
-            'order' => 'csv/purchases.csv',
+            'customerFile' => 'csv/customers.csv',
+            'orderFile' => 'csv/purchases.csv',
         ]);
         
+        $this->assertSame(0, $tester->getStatusCode());
+    }
+
+    public function testExecutionWithInvalidCustomerFile()
+    {
+        $command = new UgoOrdersImportCommand($this->entityManager, $this->customerRepository);
+        $application = new Application(self::$kernel);
+        $application->add($command);
+
+        $command = $application->find('ugo:orders:import');
+        $tester = new CommandTester($command);
+
+        $tester->execute([
+            'customerFile' => null,
+            'orderFile' => 'csv/purchases.csv',
+        ]);
+
+        $this->assertStringNotContainsString('Load customers', $tester->getDisplay());
         $this->assertSame(0, $tester->getStatusCode());
     }
 
@@ -66,10 +84,30 @@ class UgoOrdersImportCommandTest extends KernelTestCase
         $tester = new CommandTester($command);
 
         $tester->execute([
-            'customer' => 'csv/customers.csv',
-            'order' => 'csv/invalid_purchases.csv',
+            'customerFile' => 'csv/customers.csv',
+            'orderFile' => 'csv/invalid_purchases.csv',
         ]);
 
+        $this->assertStringContainsString('Number of columns not available!', $tester->getDisplay());
+        $this->assertSame(0, $tester->getStatusCode());
+    }
+
+
+    public function testExecutionWithInvalidCustomerFileAndInvalidOrderFile()
+    {
+        $command = new UgoOrdersImportCommand($this->entityManager, $this->customerRepository);
+        $application = new Application(self::$kernel);
+        $application->add($command);
+
+        $command = $application->find('ugo:orders:import');
+        $tester = new CommandTester($command);
+
+        $tester->execute([
+            'customerFile' => null,
+            'orderFile' => 'csv/invalid_purchases.csv',
+        ]);
+
+        $this->assertStringNotContainsString('Load customers', $tester->getDisplay());
         $this->assertStringContainsString('Number of columns not available!', $tester->getDisplay());
         $this->assertSame(0, $tester->getStatusCode());
     }
