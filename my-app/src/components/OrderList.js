@@ -3,7 +3,7 @@ import Message from './Message';
 import Spinner from './Spinner';
 import {connect} from 'react-redux';
 import {ordersFetch} from '../actions/actions';
-
+import Moment from 'moment';
 
 const mapStateToPropos = state => ({
     ...state.ordersList
@@ -58,7 +58,7 @@ class OrderList extends React.Component{
                                 <td>{order.quantity}</td>
                                 <td>{order.price}</td>
                                 <td>{order.currency}</td>
-                                <td>{order.date}</td>
+                                <td>{Moment(order.date).format("YYYY-MM-DD")}</td>
                             </tr>
                         ))}
                         <tr>
